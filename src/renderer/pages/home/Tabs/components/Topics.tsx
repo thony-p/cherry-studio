@@ -656,7 +656,10 @@ export function Topics({
         return
       }
 
-      if (topic.id !== activeTopicIdRef.current) return
+      // A mid-delete switch to another topic must win. An empty ('') mirror — e.g. the
+      // broadcast race wiping the selection mid-delete (#19583) — reselects the replacement.
+      const currentActiveTopicId = activeTopicIdRef.current
+      if (currentActiveTopicId && currentActiveTopicId !== topic.id) return
 
       if (replacement) {
         setActiveTopic(replacement)
@@ -959,7 +962,12 @@ export function Topics({
 
         const result = await deleteTopicsByAssistantId(assistantId)
         await refreshTopics()
-        if (deletedActiveTopicId && activeTopicIdRef.current === deletedActiveTopicId) {
+        // Same broadcast race as single-topic delete (#19583): a collapsed ('') mirror
+        // means the selection was nuked mid-delete — reselect instead of skipping.
+        if (
+          deletedActiveTopicId &&
+          (!activeTopicIdRef.current || activeTopicIdRef.current === deletedActiveTopicId)
+        ) {
           if (replacement) setActiveTopic(replacement)
           else clearActiveTopic()
         }
