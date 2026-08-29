@@ -18,7 +18,7 @@ import path from 'node:path'
 
 import { app } from 'electron'
 
-export const CHERRY_HOME_DIRNAME = '.cherrystudio'
+export const CHERRY_HOME_DIRNAME = '.tonyai'
 export const CHERRY_HOME = path.join(os.homedir(), CHERRY_HOME_DIRNAME)
 export const BOOT_CONFIG_PATH = path.join(CHERRY_HOME, 'boot-config.json')
 
@@ -88,4 +88,4 @@ if (!app.isPackaged) {
  * Single source of truth — referenced by LoggerService directly and exposed
  * via pathRegistry as the `app.logs` key for `application.getPath()` consumers.
  */
-export const LOGS_DIR = app.getPath('logs')
+export const LOGS_DIR = app.isPackaged ? path.join(CHERRY_HOME, 'logs') : app.getPath('logs')
