@@ -563,7 +563,8 @@ export const DefaultPreferences: PreferenceSchemas = {
     'agent.session.display_mode': 'agent',
     'agent.session.position': 'left',
     'app.developer_mode.enabled': false,
-    'app.dist.auto_update.enabled': true,
+    // Tony AI custom build: auto-update off so upstream releases never overwrite the rename/signature.
+    'app.dist.auto_update.enabled': false,
     'app.dist.test_plan.channel': PreferenceTypes.UpgradeChannel.LATEST,
     'app.dist.test_plan.enabled': false,
     'app.fetch.allow_private_network': true,
@@ -574,9 +575,11 @@ export const DefaultPreferences: PreferenceSchemas = {
     'app.notification.knowledge.enabled': false,
     'app.notification.mini_app.enabled': true,
     'app.notification.update.enabled': false,
-    'app.onboarding.provider_setup.status': 'pending',
+    // Tony AI custom build: no first-run onboarding or privacy gate. Providers are configured
+    // in-app (Ollama Cloud); data collection stays off.
+    'app.onboarding.provider_setup.status': 'completed',
     'app.power.prevent_sleep_when_busy': false,
-    'app.privacy.data_collection.enabled': true,
+    'app.privacy.data_collection.enabled': false,
     'app.privacy.policy_version': '',
     'app.proxy.bypass_rules': '',
     'app.proxy.mode': 'system',

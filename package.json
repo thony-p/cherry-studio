@@ -26,7 +26,7 @@
     "build:win": "dotenv pnpm run build && electron-builder --win --x64 --arm64",
     "build:win:x64": "dotenv pnpm run build && electron-builder --win --x64",
     "build:win:arm64": "dotenv pnpm run build && electron-builder --win --arm64",
-    "build:mac": "dotenv pnpm run build && electron-builder --mac --arm64 --x64",
+    "build:mac": "dotenv pnpm run build && electron-builder --mac --arm64",
     "build:mac:arm64": "dotenv pnpm run build && electron-builder --mac --arm64",
     "build:mac:x64": "dotenv pnpm run build && electron-builder --mac --x64",
     "build:linux": "dotenv pnpm run build && electron-builder --linux --x64 --arm64",

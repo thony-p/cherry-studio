@@ -1,5 +1,5 @@
-appId: com.kangfenmao.CherryStudio
-productName: Cherry Studio
+appId: com.antal.TonyAI
+productName: Tony AI
 electronLanguages:
   - zh-CN
   - zh-TW
@@ -169,6 +169,7 @@ electronDownload:
 beforePack: scripts/before-pack.js
 afterPack: scripts/after-pack.js
 afterSign: scripts/notarize.js
+# Tony AI custom build: auto-update disabled to preserve rename + own signature (Cabinet precedent)
 artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
