@@ -102,27 +102,23 @@ const MiniAppTabsPool: React.FC = () => {
     [cap, openedKeepAliveMiniApps, protectedAppIds]
   )
 
-  // Write only when pool MEMBERSHIP actually differs from the cache — an
-  // identical re-write would invite a write/echo cycle: this effect runs on
-  // every retention change, and sibling effects re-add entries the LRU just
-  // dropped (2026-08-29 freeze: unbounded #185 loop under a restored cache).
-  // Ordering differences never rewrite; a re-added app always does, so the
-  // cache is re-trimmed even when a pre-crash cache survived a SIGKILL.
+  // Commit the render-time retention decision before MiniAppPage passive
+  // effects can add or touch entries in the shared keep-alive cache.
+  //
+  // Filter `prev` instead of writing this render's snapshot: the host-eviction
+  // IPC handler and other windows remove entries through functional updates,
+  // and a snapshot write would resurrect their victims (2026-08-29 freeze:
+  // an unconditionally rewritten cache fed an unbounded write/echo #185 loop).
+  // A content-equal result is short-circuited by the cache's deep isEqual, so
+  // the settled state no longer notifies anyone.
   useLayoutEffect(() => {
     if (retention.evicted.length === 0) return
-    const keepIds = new Set(retention.keep.map((app) => app.appId))
-    const cacheMatchesKeep =
-      openedKeepAliveMiniApps.length === retention.keep.length &&
-      openedKeepAliveMiniApps.every((app) => keepIds.has(app.appId))
-    if (cacheMatchesKeep) return
-    logger.warn('Keep-alive pool over cap, evicting', {
-      evicted: retention.evicted.map((app) => app.appId),
-      cacheSize: openedKeepAliveMiniApps.length,
-      cap
-    })
-    setOpenedKeepAliveMiniApps(retention.keep)
+    const evictedIds = new Set(retention.evicted.map((app) => app.appId))
+    // Pure updater: filter always returns a fresh array, and a content-equal
+    // result is short-circuited by the cache setter's deep isEqual (silent no-op).
+    setOpenedKeepAliveMiniApps((prev) => prev.filter((app) => !evictedIds.has(app.appId)))
     for (const app of retention.evicted) clearWebviewState(app.appId)
-  }, [cap, openedKeepAliveMiniApps, retention, setOpenedKeepAliveMiniApps])
+  }, [retention, setOpenedKeepAliveMiniApps])
 
   // Host-initiated eviction: unlike the LRU path there is nothing to negotiate — the
   // host is already waiting on this webview going away.

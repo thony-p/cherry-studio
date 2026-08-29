@@ -497,11 +497,15 @@ describe('MiniAppTabsPool', () => {
     const charlie = stubApp('charlie')
     mocks.maxKeepAliveMiniApps = 1
     mocks.openedKeepAliveMiniApps = [alpha, bravo, charlie]
+    // charlie keeps an (unpinned, inactive) tab so orphan cleanup stays out of
+    // this test; only the retention trim should touch the cache here.
+    mocks.tabs = [{ id: 'charlie-tab', url: '/app/mini-app/charlie' }]
 
     const { container } = render(<MiniAppTabsPool />)
 
     expect(renderedAppIds(container)).toEqual(['charlie'])
-    expect(mocks.setOpenedKeepAliveMiniApps).toHaveBeenCalledWith([charlie])
+    // The pool writes through a functional updater; assert the resolved cache state.
+    expect(mocks.openedKeepAliveMiniApps.map((app) => app.appId)).toEqual(['charlie'])
     expect(mocks.clearWebviewState).toHaveBeenCalledWith('alpha')
     expect(mocks.clearWebviewState).toHaveBeenCalledWith('bravo')
   })
@@ -520,7 +524,7 @@ describe('MiniAppTabsPool', () => {
     const { container } = render(<MiniAppTabsPool />)
 
     expect(renderedAppIds(container)).toEqual(['pinA', 'pinC'])
-    expect(mocks.setOpenedKeepAliveMiniApps).toHaveBeenCalledWith([pinA, pinC])
+    expect(mocks.openedKeepAliveMiniApps.map((app) => app.appId)).toEqual(['pinA', 'pinC'])
     expect(mocks.clearWebviewState).toHaveBeenCalledWith('unpinned')
   })
 
@@ -541,7 +545,7 @@ describe('MiniAppTabsPool', () => {
     const { container } = render(<MiniAppTabsPool />)
 
     expect(renderedAppIds(container)).toEqual(['active', 'pinned'])
-    expect(mocks.setOpenedKeepAliveMiniApps).toHaveBeenCalledWith([pinned, active])
+    expect(mocks.openedKeepAliveMiniApps.map((app) => app.appId)).toEqual(['pinned', 'active'])
     expect(mocks.clearWebviewState).toHaveBeenCalledWith('dormant')
     expect(mocks.clearWebviewState).not.toHaveBeenCalledWith('active')
   })
@@ -558,7 +562,7 @@ describe('MiniAppTabsPool', () => {
     const { container } = render(<MiniAppTabsPool />)
 
     expect(renderedAppIds(container)).toEqual(['alpha'])
-    expect(mocks.setOpenedKeepAliveMiniApps).toHaveBeenCalledWith([alpha])
+    expect(mocks.openedKeepAliveMiniApps.map((app) => app.appId)).toEqual(['alpha'])
     expect(mocks.clearWebviewState).toHaveBeenCalledWith('bravo')
     expect(mocks.clearWebviewState).not.toHaveBeenCalledWith('alpha')
   })
